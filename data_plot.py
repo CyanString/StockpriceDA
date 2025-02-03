@@ -56,6 +56,6 @@ axes[1, 1].set_ylabel('Price (USD)')
 axes[1, 1].legend()
 axes[1, 1].grid(True)
 
-# 自动调整子图布局
 plt.tight_layout()
+plt.savefig('stock_price_plots.png')  # 可以自定义路径和文件名，例如 ''
 plt.show()
