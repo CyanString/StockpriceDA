@@ -1,7 +1,13 @@
 import numpy as np
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+DIR = 'stockprice_data/'
+FILES_DATA = ['NVIDIA Stock Price History.csv', 'Meta Platforms Stock Price History.csv', ..]
+
+for file in FILES_DATA:
+   price= pd.read_csv(os.path.join(DIR,file))
 
 # Read the csv file
 nvidia_price = pd.read_csv('stockprice_data/NVIDIA Stock Price History.csv')
