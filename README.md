@@ -31,11 +31,13 @@ To run the project, you need to install the following Python libraries:
 
 ### 1. Moving strategy
 
-### 2. Bollinger Bands
+### 2. Bollinger Bands  
 
 ### 3. Momentum Oscillators
 
 ### 4. Relative strength index
+
+### 5. Fibonacci
 
 some plot of Technical Analysis tool....
 
