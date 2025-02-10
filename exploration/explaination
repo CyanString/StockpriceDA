@@ -1,0 +1,8 @@
+Task1. article read of the ML model
+
+This ML model using the ARIMA and SVM model to forcast several stock price data.
+it turn out that the hybrid model work better on each sigal one.
+
+But it still have the problem of the number of the data and it may only effective for
+a special period.
+
