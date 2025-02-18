@@ -3,6 +3,8 @@ import pandas as pd
 import os
 
 
+
+
 DIR = 'stockprice_data/'
 FILES_DATA = ['NVIDIA Stock Price History.csv', 'Meta Platforms Stock Price History.csv',
               'Microsoft Stock Price History.csv','Tesla Stock Price History.csv' ]

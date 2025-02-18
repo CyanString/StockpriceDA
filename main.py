@@ -1,13 +1,17 @@
 """
-This main file take the core function of the project which will
-give several strategy and provide the proper explanation
+For this project the main script file have application:
+1. allow user to input the stock price data
+2. allow user to input the period of the RSI
+3. allow user to input the indicators of the RSI
+4. generate the RSI plot
 """
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from RSI import generate_rsi_plot
-
+from Fibonacci import fibonacci_plot
+from swing import swing_plot
 
 DIR = 'stockprice_data/'
 FILES_DATA = ['NVIDIA Stock Price History.csv', 'Meta Platforms Stock Price History.csv',
@@ -29,6 +33,9 @@ for file in FILES_DATA:
 
     )
 
+    fibonacci_plot(stock_data,start_date='2024-01-01')
+
+    swing_plot(stock_data,start_date='2024-10-01',trendline_method= "moving_average")
 
 
 
