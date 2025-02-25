@@ -17,6 +17,34 @@ DIR = 'stockprice_data/'
 FILES_DATA = ['NVIDIA Stock Price History.csv', 'Meta Platforms Stock Price History.csv',
               'Microsoft Stock Price History.csv','Tesla Stock Price History.csv' ]
 
+class TrendlineAnalyser:
+
+    def __init__(self):
+        pass
+
+    def load_data(self, filename):
+        pass
+
+    def setMethod(self, name):
+        pass
+
+    def detectSwing(self):
+        pass
+
+    def plot(self):
+        pass
+
+    def detectTrend(self):
+        pass
+    
+
+    def plotTrend(self):
+        pass
+
+    def analyze(self):
+        pass
+
+
 for file in FILES_DATA:
     # change the date to the special datetime form and then sort it by the Date
     stock_data= pd.read_csv(os.path.join(DIR, file))
