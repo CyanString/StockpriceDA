@@ -1,41 +1,43 @@
-"""
-For this project the main script file have application:
-1. allow user to input the stock price data
-2. allow user to input the period of the RSI
-3. allow user to input the indicators of the RSI
-4. generate the RSI plot
-"""
 
+import os
+from indicator import generate_signals, signal_plot, calculate_return
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
-from RSI import generate_rsi_plot
-from Fibonacci import fibonacci_plot
-from swing import swing_plot
 
-DIR = 'stockprice_data/'
-FILES_DATA = ['NVIDIA Stock Price History.csv', 'Meta Platforms Stock Price History.csv',
-              'Microsoft Stock Price History.csv','Tesla Stock Price History.csv' ]
 
-for file in FILES_DATA:
-    # change the date to the special datetime form and then sort it by the Date
-    stock_data= pd.read_csv(os.path.join(DIR, file))
-    stock_data['Date'] = pd.to_datetime(stock_data['Date'])
-    stock_data = stock_data.sort_values('Date')
+class TrendlineAnalysis:
+    def __init__(self):
+        self.data = None
+        self.method = None
 
-    generate_rsi_plot(
-        stock_data = stock_data,
-        price_column = 'Price',
-        date_column = 'Date',
-        period=14,
-        indicators=(30, 70),
-        stock_name=file.split(' ')[0]
+    def fetch_data(self, ticker):
+        """Loads data from a CSV file and ensures the date column is properly formatted."""
+        self.data = pd.read_csv(filepath)
+        self.data['Date'] = pd.to_datetime(self.data['Date'])
+        self.data.set_index('Date', inplace=True)
 
-    )
+    def setMethod(self, method='EMA'):
+        """Sets the trend detection method."""
+        self.method = method
 
-    fibonacci_plot(stock_data,start_date='2024-01-01')
+    def EMA(self):
+        self.data['EMA'] = self.data['Close'].ewm(span=30, adjust=False).mean()
 
-    swing_plot(stock_data,start_date='2024-10-01',trendline_method= "moving_average")
+    def signals(self):
+        """Uses the EMA method to detect trends."""
+        self.data['Buy signal'],self.data['Sell signal'] = generate_signals(self.data)
+        return 0
+
+    def plot(self):
+        signal_plot(self.data)
+
+    def analysis(self):
+        """Displays trend analysis results."""
+        calculate_return(self.data)
+
+
+
+
 
 
 
