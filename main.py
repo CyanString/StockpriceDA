@@ -10,7 +10,7 @@ class TrendlineAnalysis:
         self.data = None
         self.method = None
 
-    def load_data(self, filepath):
+    def fetch_data(self, ticker):
         """Loads data from a CSV file and ensures the date column is properly formatted."""
         self.data = pd.read_csv(filepath)
         self.data['Date'] = pd.to_datetime(self.data['Date'])
@@ -19,6 +19,7 @@ class TrendlineAnalysis:
     def setMethod(self, method='EMA'):
         """Sets the trend detection method."""
         self.method = method
+
     def EMA(self):
         self.data['EMA'] = self.data['Close'].ewm(span=30, adjust=False).mean()
 
