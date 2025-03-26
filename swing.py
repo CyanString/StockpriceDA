@@ -15,7 +15,7 @@ def calculate_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-
+#
 def calculate_ema(data, window):
     return data['Close'].ewm(span=window, adjust=False).mean()
 
