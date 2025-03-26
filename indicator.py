@@ -3,7 +3,7 @@ import numpy as np
 import yfinance as yf
 from datetime import datetime, timedelta
 
-
+#
 class TrendStrategy:
     def __init__(self, symbol='AAPL', period='1y',
                  rsi_window=14, ema_short=5, ema_long=13,

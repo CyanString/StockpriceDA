@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from indicator import TrendStrategy
 
-
+#
 class TradingGUI:
     def __init__(self, root):
         self.root = root
