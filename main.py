@@ -1,61 +1,81 @@
-
-import os
-from indicator import generate_signals, signal_plot, calculate_return
-import data_fetch
-import pandas as pd
-import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import ttk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from indicator import TrendStrategy
 
-class TrendlineAnalysis:
+#
+class TradingGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Trading Analysis")
-        self.root.geometry("400x200")
+        self.root.title("quint v1.0")
+        self.setup_ui()
+        self.strategy = None
 
-        # Configure style
-        self.style = ttk.Style()
-        self.style.configure('Modern.TFrame', background='#f0f0f0')
-        self.style.configure('Modern.TLabel', background='#f0f0f0', font=('Helvetica', 10))
-        self.style.configure('Modern.TButton', font=('Helvetica', 10))
+    def setup_ui(self):
+        # control frame
+        control_frame = ttk.LabelFrame(self.root, text="parameter setting", padding=10)
+        control_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        self.create_widgets()
+        ttk.Label(control_frame, text="stock ttk").grid(row=0, column=0)
+        self.symbol_entry = ttk.Entry(control_frame)
+        self.symbol_entry.insert(0, "AAPL")
+        self.symbol_entry.grid(row=0, column=1)
 
-    def create_widgets(self):
-        """Creates the GUI widgets for user input."""
-        main_frame = ttk.Frame(self.root, padding="20", style='Modern.TFrame')
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        ttk.Label(control_frame, text="time zone").grid(row=1, column=0)
+        self.period_combo = ttk.Combobox(control_frame,
+                                         values=['1mo', '3mo', '6mo', '1y', '2y', '5y'])
+        self.period_combo.current(3)
+        self.period_combo.grid(row=1, column=1)
 
-        entry_width = 20
+        ttk.Button(control_frame, text="run strategy",
+                   command=self.run_strategy).grid(row=2, columnspan=2, pady=10)
 
-        # Stock Input
-        ttk.Label(main_frame, text="Stock Ticker:", style='Modern.TLabel').grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        self.stock_entry = ttk.Entry(main_frame, width=entry_width)
-        self.stock_entry.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
+        # 结果显示
+        result_frame = ttk.LabelFrame(self.root, text="result", padding=10)
+        result_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # Period Input
-        ttk.Label(main_frame, text="Period (years):", style='Modern.TLabel').grid(row=1, column=0, padx=10, pady=5, sticky="w")
-        self.period_entry = ttk.Entry(main_frame, width=entry_width)
-        self.period_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+        self.result_text = tk.Text(result_frame, height=8)
+        self.result_text.pack(fill=tk.BOTH, expand=True)
 
-        # Method Selection
-        ttk.Label(main_frame, text="Analysis Method:", style='Modern.TLabel').grid(row=2, column=0, padx=10, pady=5, sticky="w")
-        self.method_var = tk.StringVar(value="EMA")
-        self.method_menu = ttk.Combobox(main_frame, textvariable=self.method_var, values=["EMA", "RSI"], width=entry_width - 2)
-        self.method_menu.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        # 图表区域
+        self.fig, self.ax = plt.subplots(figsize=(10, 4))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=result_frame)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        # Button to fetch results
-        self.fetch_button = ttk.Button(main_frame, text="Run Result", command=self.run_analysis)
-        self.fetch_button.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+    def run_strategy(self):
+        symbol = self.symbol_entry.get()
+        period = self.period_combo.get()
 
-    def run_analysis(self):
-        stock = self.stock_entry.get()
-        period = self.period_entry.get()
-        method = self.method_var.get()
-        print(f"Running {method} analysis for {stock} over {period} years.")
+        self.strategy = TrendStrategy(symbol=symbol, period=period)
+        data = self.strategy.run()
 
-# Run the application
+        self.display_results(data)
+        self.plot_data(data)
+
+    def display_results(self, data):
+        self.result_text.delete(1.0, tk.END)
+        last_signal = data['Buy_Signal'].iloc[-1]
+        self.result_text.insert(tk.END,
+                                f"new_signal: {'buy' if last_signal == 1 else 'observe'}\n\n")
+        self.result_text.insert(tk.END, data.tail().to_string())
+
+    def plot_data(self, data):
+        self.ax.clear()
+        data['Close'].plot(ax=self.ax, label='Price', color='blue')
+        data['EMA_Fast'].plot(ax=self.ax, label='EMA_Fast', color='orange')
+        data['EMA_Slow'].plot(ax=self.ax, label='EMA_Slow', color='green')
+
+        buy_signals = data[data['Buy_Signal'] == 1]
+        self.ax.scatter(buy_signals.index, buy_signals['Close'],
+                        color='red', marker='^', label='buy_signal')
+
+        self.ax.legend()
+        self.canvas.draw()
+
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = TrendlineAnalysis(root)
+    app = TradingGUI(root)
+    root.geometry("800x600")
     root.mainloop()
