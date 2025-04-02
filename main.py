@@ -31,14 +31,14 @@ class TradingGUI:
         ttk.Button(control_frame, text="run strategy",
                    command=self.run_strategy).grid(row=2, columnspan=2, pady=10)
 
-        # 结果显示
+        # report
         result_frame = ttk.LabelFrame(self.root, text="result", padding=10)
         result_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         self.result_text = tk.Text(result_frame, height=8)
         self.result_text.pack(fill=tk.BOTH, expand=True)
 
-        # 图表区域
+        # region
         self.fig, self.ax = plt.subplots(figsize=(10, 4))
         self.canvas = FigureCanvasTkAgg(self.fig, master=result_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)

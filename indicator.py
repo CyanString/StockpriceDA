@@ -56,7 +56,7 @@ class TrendStrategy:
         current_close = data['Close'].iloc[current_idx]
         atr = data['ATR'].iloc[current_idx]
 
-        # 动态止盈止损
+        #
         take_profit = entry_price * (1 + 1.5 * atr / entry_price)
         stop_loss = entry_price * (1 - 0.8 * atr / entry_price)
 
@@ -102,7 +102,7 @@ class TrendStrategy:
 
         data['Sell_Signal'] = (
             (data['RSI'] > 30) &
-            ((data['Close'] < data['EMA9']) | (data['EMA9'] < data['EMA20'])) &
+            ((data['Close'] < data['EMA_Fast']) | (data['EMA_Fast'] < data['EMA_Slow'])) &
             (data['PLR_Slope'] < 0)
         )
 
@@ -111,7 +111,7 @@ class TrendStrategy:
 
     def run_backtest(self):
         data = self.run
-        # 交易模拟
+        #
         trades = []
         position = False
         entry_price = 0
@@ -126,7 +126,7 @@ class TrendStrategy:
                     'Action': 'Buy',
                     'Price': entry_price,
                     'Date': data.index[i],
-                    'Shares': 100  # 假设每次买入100股
+                    'Shares': 100  #
                 })
 
             elif position:
@@ -145,7 +145,7 @@ class TrendStrategy:
                         'Shares': 100
                     })
 
-        # 计算绩效
+
         sell_trades = [t for t in trades if t['Action'] == 'Sell']
         stats = {
             'trades': trades,
