@@ -1,13 +1,16 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
+import os
+from datetime import datetime
 from datetime import datetime, timedelta
 
 #
 class TrendStrategy:
     def __init__(self, symbol='AAPL', period='1y',
                  rsi_window=14, ema_short=5, ema_long=13,
-                 atr_window=14, plr_window=5):
+                 atr_window=14, plr_window=5,
+                 tp_multiplier=1.5, sl_multiplier=0.8):
         self.symbol = symbol
         self.period = period
         self.params = {
@@ -15,7 +18,9 @@ class TrendStrategy:
             'ema_short': ema_short,
             'ema_long': ema_long,
             'atr_window': atr_window,
-            'plr_window': plr_window
+            'plr_window': plr_window,
+            'tp_multiplier': tp_multiplier,
+            'sl_multiplier': sl_multiplier
         }
 
     def _calculate_rsi(self, data):
@@ -57,21 +62,23 @@ class TrendStrategy:
         atr = data['ATR'].iloc[current_idx]
 
         #
-        take_profit = entry_price * (1 + 1.5 * atr / entry_price)
-        stop_loss = entry_price * (1 - 0.8 * atr / entry_price)
+        take_profit = entry_price * (1 + self.params['tp_multiplier'] * atr / entry_price)
+        stop_loss = entry_price * (1 - self.params['sl_multiplier'] * atr / entry_price)
 
         if current_close >= take_profit:
             return True, take_profit, 'take_profit'
         elif current_close <= stop_loss:
             return True, stop_loss, 'stop_loss'
-        elif data['Exit_Signal'].iloc[current_idx]:
-            return True, current_close, 'exit_signal'
+        elif data['Sell_Signal'].iloc[current_idx]:
+            return True, current_close, 'sell_signal'
         return False, None, None
 
     def run(self):
         # download the data
         stock = yf.Ticker(self.symbol)
         data = stock.history(period=self.period)[['Close', 'High', "Low"]]  # Fetch data and select 'Close' column
+        data = data.dropna()
+        data = data.drop_duplicates()
         data = data.reset_index()  # Reset index to include 'Date' as a column
         data["Date"] = pd.to_datetime(data.Date)
 
@@ -108,17 +115,15 @@ class TrendStrategy:
 
         return data
 
-
-    def run_backtest(self):
-        data = self.run
-        #
+    def run_backtest(self, data):
+        # simulation
         trades = []
         position = False
         entry_price = 0
         entry_index = 0
 
         for i in range(len(data)):
-            if not position and data['Entry_Signal'].iloc[i]:
+            if not position and data['Buy_Signal'].iloc[i]:
                 position = True
                 entry_price = data['Close'].iloc[i]
                 entry_index = i
@@ -126,7 +131,7 @@ class TrendStrategy:
                     'Action': 'Buy',
                     'Price': entry_price,
                     'Date': data.index[i],
-                    'Shares': 100  #
+                    'Shares': 100
                 })
 
             elif position:
@@ -145,7 +150,7 @@ class TrendStrategy:
                         'Shares': 100
                     })
 
-
+        # generate the effects
         sell_trades = [t for t in trades if t['Action'] == 'Sell']
         stats = {
             'trades': trades,
@@ -162,6 +167,30 @@ class TrendStrategy:
             stats['max_win'] = max(t['Pct_Change'] for t in sell_trades)
             stats['max_loss'] = min(t['Pct_Change'] for t in sell_trades)
 
-        return data, trades, stats
+        return trades, stats
+
+    def save_to_csv(self, data, filename="stock_data.csv"):
+
+        try:
+            os.makedirs('data', exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d")
+            full_path = f"data/{timestamp}_{filename}"
+
+            if not os.path.exists(full_path):
+                os.makedirs(full_path)
+
+            #
+            data.to_csv(full_path, columns=[
+                'Date', 'Close', 'High', 'Low',
+                'RSI', 'EMA_Fast', 'EMA_Slow',
+                'PLR_Slope', 'ATR', 'Buy_Signal', 'Sell_Signal'
+            ], index=False)
+
+            return full_path
+        except Exception as e:
+            print(f"[Error] data fail to download: {str(e)}")
+            return None
+
+
 
 
