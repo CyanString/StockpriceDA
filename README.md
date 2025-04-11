@@ -62,7 +62,7 @@ To run the project, you need to install the following Python libraries:
 ## User Infernce
 
 
-![Stock Price Plot](interface and report.png)
+![Stock Price Plot](stock_price_plots.png)
 
 
 
